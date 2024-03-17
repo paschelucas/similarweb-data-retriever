@@ -1,0 +1,6 @@
+development:
+  clients:
+    default:
+      uri: mongodb+srv://challenge_username:<password>@challenge-cluster.spicyha.mongodb.net/
+      options:
+        server_selection_timeout: 5

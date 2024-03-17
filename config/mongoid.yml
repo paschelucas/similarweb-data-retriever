@@ -1,0 +1,6 @@
+development:
+  clients:
+    default:
+      uri: mongodb+srv://test-user:WF45GumdmPV8vvdc@challenge-cluster.spicyha.mongodb.net/challenge-cluster?retryWrites=true&w=majority&appName=challenge-cluster
+      options:
+        server_selection_timeout: 5
