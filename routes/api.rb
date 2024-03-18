@@ -1,15 +1,12 @@
 require 'selenium-webdriver'
 require 'securerandom'
 require 'dotenv'
+require 'async'
 require_relative '../config/DriverManager'
 require_relative '../utils/extract_data'
 require_relative '../models/WebsiteData'
+require_relative '../utils/scraper/website_scraper'
 Dotenv.load
-
-configure do
-    set :driver_manager, DriverManager.new
-    set :BASE_SIMILARWEB_URL, ENV['BASE_SIMILARWEB_URL']
-end
 
 post '/salve_info' do
     content_type :json
@@ -28,51 +25,12 @@ post '/salve_info' do
         existing_website = WebsiteData.find_by(website_url: encoded_url)
         puts "Existing website: #{existing_website.inspect}"
         if existing_website
-            puts 'alolaolaolaolaoaloal-----'
             status(422)
             return { error: 'Site já adicionado à base de dados.' }.to_json
         end
         
+        website_data = WebsiteScraper.fetch_website_data(encoded_url)
         operation_id = SecureRandom.uuid
-        driver = settings.driver_manager.get_driver
-        BASE_SIMILARWEB_URL = settings.BASE_SIMILARWEB_URL
-        driver.get(BASE_SIMILARWEB_URL)
-        website_current_url = driver.current_url
-
-        website_data = {
-            'Company' => nil,
-            'Year Founded' => nil,
-            'Employees' => nil,
-            'HQ' => nil,  
-            'Annual Revenue' => nil,  
-            'Industry' => nil,  
-            'Total Visits' => nil,  
-            'Bounce Rate' => nil,  
-            'Pages per Visit' => nil,  
-            'Last Month Change' => nil,  
-            'Avg Visit Duration' => nil, 
-            'Global Rank' => nil,
-            'Country Rank' => nil,
-            'Category Rank' => nil
-        }
-
-        close_popup_button = driver.find_element(class: 'app-banner__dismiss-button')
-        close_popup_button.click if close_popup_button
-        driver.find_elements(tag_name: 'input')[1].send_keys(encoded_url)
-
-        buttons = driver.find_elements(tag_name: 'button')
-        search_button = buttons.filter { |button| button.text == 'Search' }[0]
-        search_button.click
-
-        info_boxes = driver.find_elements(class: 'engagement-list__item')
-        extract_data(info_boxes, website_data)
-
-        info_card_rows = driver.find_elements(class: 'app-company-info__row')
-        extract_data(info_card_rows, website_data)
-
-        info_ranking_boxes = driver.find_elements(class: 'wa-rank-list__item')
-        extract_data(info_ranking_boxes, website_data)
-
         website_object = WebsiteData.new(
             operation_id: operation_id,
             website_url: encoded_url,
@@ -130,5 +88,4 @@ post '/get_info' do
 
     status(200)
     return { message: 'Informações encontradas', data: website_data }.to_json
-
 end

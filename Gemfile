@@ -21,3 +21,5 @@ gem "wdm", "~> 0.1.1"
 gem "open-uri", "~> 0.4.1"
 
 gem "selenium-webdriver", "~> 4.18"
+
+gem "async", "~> 2.9"
