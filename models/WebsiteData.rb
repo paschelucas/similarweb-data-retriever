@@ -14,4 +14,7 @@ class WebsiteData
     field :pages_per_visit, type: Float
     field :last_month_change, type: String
     field :average_visit_duration, type: String
+    field :global_rank, type: String
+    field :country_rank, type: String
+    field :category_rank, type: String
 end

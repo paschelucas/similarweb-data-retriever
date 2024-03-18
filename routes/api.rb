@@ -46,6 +46,9 @@ post '/salve_info' do
                 'Pages per Visit' => nil,  
                 'Last Month Change' => nil,  
                 'Avg Visit Duration' => nil, 
+                'Global Rank' => nil,
+                'Country Rank' => nil,
+                'Category Rank' => nil
             }
 
             close_popup_button = driver.find_element(class: 'app-banner__dismiss-button')
@@ -62,6 +65,10 @@ post '/salve_info' do
             info_card_rows = driver.find_elements(class: 'app-company-info__row')
             extract_data(info_card_rows, website_data)
 
+            info_ranking_boxes = driver.find_elements(class: 'wa-rank-list__item')
+            extract_data(info_ranking_boxes, website_data)
+
+
             website_object = WebsiteData.new(
                 operation_id: operation_id,
                 website_url: encodedUrl,
@@ -75,11 +82,15 @@ post '/salve_info' do
                 bounce: website_data['Bounce Rate'],
                 pages_per_visit: website_data['Pages per Visit'],
                 last_month_change: website_data['Last Month Change'],
-                average_visit_duration: website_data['Avg Visit Duration']
+                average_visit_duration: website_data['Avg Visit Duration'],
+                :global_rank => website_data['Global Rank'],
+                :country_rank => website_data['Country Rank'],
+                :category_rank => website_data['Category Rank']
             )
 
             begin
-                website_object.save!
+                puts website_data
+                # website_object.save!
             rescue Mongo::Error => e
                 status(500)
                 return { error: "Erro ao salvar os dados: #{e.message}" }
