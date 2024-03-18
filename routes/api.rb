@@ -1,7 +1,6 @@
 require 'selenium-webdriver'
 require 'securerandom'
 require 'dotenv'
-require 'async'
 require_relative '../config/DriverManager'
 require_relative '../utils/extract_data'
 require_relative '../models/WebsiteData'

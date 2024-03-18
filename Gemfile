@@ -8,11 +8,8 @@ gem 'puma'
 
 # gem "rails"
 
-gem "rackup", "~> 2.1"
 
 gem "mongo", "~> 2.19"
-
-gem "nokogiri", "~> 1.16"
 
 gem "rerun", "~> 0.14.0"
 
@@ -22,4 +19,4 @@ gem "open-uri", "~> 0.4.1"
 
 gem "selenium-webdriver", "~> 4.18"
 
-gem "async", "~> 2.9"
+gem "rackup", "~> 2.1"
