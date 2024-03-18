@@ -2,9 +2,10 @@ class WebsiteData
     include Mongoid::Document
 
     field :operation_id, type: String
+    field :website_url, type: String
     field :company, type: String
     field :year_founded, type: Integer
-    field :employees, type: Integer
+    field :employees, type: String
     field :head_quarters, type: String
     field :annual_revenue, type: String
     field :industry, type: String
