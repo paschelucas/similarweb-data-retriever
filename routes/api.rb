@@ -9,7 +9,6 @@ Dotenv.load
 
 post '/salve_info' do
     content_type :json
-    request.body.rewind
     request_body = JSON.parse(request.body.read)
     received_url = request_body['url']
     if (received_url.nil? || received_url.empty?) 
@@ -67,9 +66,8 @@ end
 
 post '/get_info' do
     content_type :json
-    request.body.rewind
-    requestBody = JSON.parse(request.body.read)
-    received_url = requestBody['url']
+    request_body = JSON.parse(request.body.read)
+    received_url = request_body['url']
 
     if received_url.nil? || received_url.empty?
         status(422)
