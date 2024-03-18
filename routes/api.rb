@@ -23,7 +23,6 @@ post '/salve_info' do
     begin
         encoded_url = CGI.escape(received_url)
         existing_website = WebsiteData.find_by(website_url: encoded_url)
-        puts "Existing website: #{existing_website.inspect}"
         if existing_website
             status(422)
             return { error: 'Site já adicionado à base de dados.' }.to_json
@@ -80,12 +79,12 @@ post '/get_info' do
 
     begin
         website_data = WebsiteData.find_by(website_url: received_url)
+
         unless website_data
             status(404)
             return { error: 'Informações não encontradas.' }.to_json
         end
+        status(200)
+        return { message: 'Informações encontradas', data: website_data }.to_json
     end
-
-    status(200)
-    return { message: 'Informações encontradas', data: website_data }.to_json
 end
