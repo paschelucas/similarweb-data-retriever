@@ -22,3 +22,6 @@ gem "selenium-webdriver", "~> 4.18"
 gem "rackup", "~> 2.1"
 
 gem "sinatra-contrib", "~> 4.0"
+
+gem 'dotenv', '~> 2.7', '>= 2.7.6'
+
