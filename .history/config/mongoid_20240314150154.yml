@@ -1,5 +1,0 @@
-development:
-  clients:
-    default:
-      database: blog_development
-      

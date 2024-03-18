@@ -1,8 +1,0 @@
-development:
-  clients:
-    default:
-      uri: mongodb+srv://challenge_username:<password>@challenge-cluster.spicyha.mongodb.net/?retryWrites=true&w=majority&appName=challenge-cluster
-      hosts: 
-        - localhost:27017
-      options:
-        server_selection_timeout: 1
