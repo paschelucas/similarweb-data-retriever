@@ -1,32 +1,22 @@
-require 'nokogiri'
-require 'json'
-require 'open-uri'
 require 'selenium-webdriver'
-
-options = Selenium::WebDriver::Options.firefox
-@driver = Selenium::WebDriver.for :firefox, options: options
-puts 'meu driver => ', @driver
-@BASE_SIMILARWEB_URL = 'https://www.similarweb.com'
-
-@driver.get(@BASE_SIMILARWEB_URL)
-
-
-@driver.find_element(class: 'app-banner__dismiss-button').click
+require_relative '../config/DriverManager'
+require_relative '../utils/extract_data'
+require_relative '../models/WebsiteData'
 
 configure do
-    set :driver, @driver
+    set :driver_manager, DriverManager.new
+    set :BASE_SIMILARWEB_URL, 'https://www.similarweb.com'
 end
-# @driver.find_elements(tag_name: 'input')[1].clear
-# @driver.find_elements(tag_name: 'input')[1].click
+puts 'meu driver => ', @driver
 
-# TODO ja encontramos o input. agora vamos enviar o form
 post '/salve_info' do
-    driver = settings.driver
+    driver = settings.driver_manager.get_driver
+    BASE_SIMILARWEB_URL = settings.BASE_SIMILARWEB_URL
+    request_times = 0
+
     request.body.rewind
     requestBody = JSON.parse(request.body.read)
     receivedUrl = requestBody['url']
-    driver = @driver
-    puts 'meu driver doisisisisisis => ', driver
 
     if (receivedUrl.nil? || receivedUrl.empty?) 
         status(422)
@@ -36,33 +26,68 @@ post '/salve_info' do
     end
     
     encodedUrl = CGI.escape(receivedUrl)
-    @LIST_URL = "#{@BASE_SIMILARWEB_URL}/website/#{encodedUrl}"
-    @driver.find_elements(tag_name: 'input')[1].send_keys(@LIST_URL)
+    website_current_url = driver.current_url
 
-    puts "================= #{uri}"
-    # USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36'
-    # html = URI.open("http://www.similarweb.com", {'User-Agent' => USER_AGENT})
-    # doc = Nokogiri::HTML(html)
+    website_data = {
+        'Company' => nil,
+        'Year Founded' => nil,
+        'Employees' => nil,
+        'HQ' => nil,  
+        'Annual Revenue' => nil,  
+        'Industry' => nil,  
+        'Total Visits' => nil,  
+        'Bounce Rate' => nil,  
+        'Pages per Visit' => nil,  
+        'Last Month Change' => nil,  
+        'Avg Visit Duration' => nil,  
+    }
+
+    driver.get(BASE_SIMILARWEB_URL)
+    close_popup_button = driver.find_element(class: 'app-banner__dismiss-button')
+    close_popup_button.click if close_popup_button
+    driver.find_elements(tag_name: 'input')[1].send_keys(encodedUrl)
+
+    buttons = driver.find_elements(tag_name: 'button')
+    search_button = buttons.filter { |button| button.text == 'Search' }[0]
+    search_button.click
+
+    info_boxes = driver.find_elements(class: 'engagement-list__item')
+    extract_data(info_boxes, website_data)
+    info_card_rows = driver.find_elements(class: 'app-company-info__row')
+    extract_data(info_card_rows, website_data)
+
+
+    website_object = WebsiteData.new(
+        company: website_data['Company'],
+        year_founded: website_data['Year Founded'],
+        employees: website_data['Employees'],
+        head_quarters: website_data['HQ'],
+        annual_revenue: website_data['Annual Revenue'],
+        industry: website_data['Industry'],
+        total_visits: website_data['Total Visits'],
+        bounce: website_data['Bounce Rate'],
+        pages_per_visit: website_data['Pages per Visit'],
+        last_month_change: website_data['Last Month Change'],
+        average_visit_duration: website_data['Avg Visit Duration']
+    )
+
+    unless website_object.valid?
+        status(422)
+        return { error: "Erro na requisição: #{website_object.errors.full_messages}" }.to_json
+    end
+
+    begin
+        website_object.save!
+    rescue StandardError => e
+        status(500)
+        return { error: "Erro ao salvar os dados: #{e.message}" }
+    end
     
-    
-    # description = doc.css("p").text
-    # puts description
+    status(201)
+    return { message: 'Dados salvos!', data: website_data }.to_json
 
-    # rows = doc.css('div.appcompany-info wa-overview__company')
-
-    # rows[1..-2].each do |row|
-    #     hrefs = row.css("td a").map{ |a| 
-    #       a['href'] if a['href'].match("/website/")
-    #     }.compact.uniq
-      
-    #     hrefs.each do |href|
-    #      puts href
-    #     end
-    # end
-
-    # return rows.to_s
-
-
+ensure
+    settings.driver_manager.quit_driver
 end
 
 
@@ -88,4 +113,8 @@ end
 #     post = Post.find(post_id)
 #     comment = post.comments.create!(params[:comment])
 #     {}.to_json
+# end
+
+# after do
+#     settings.driver_manager.quit_driver
 # end
