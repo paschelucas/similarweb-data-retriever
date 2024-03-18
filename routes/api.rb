@@ -1,12 +1,13 @@
 require 'selenium-webdriver'
 require 'securerandom'
+require 'dotenv/load'
 require_relative '../config/DriverManager'
 require_relative '../utils/extract_data'
 require_relative '../models/WebsiteData'
 
 configure do
     set :driver_manager, DriverManager.new
-    set :BASE_SIMILARWEB_URL, 'https://www.similarweb.com'
+    set :BASE_SIMILARWEB_URL, ENV['BASE_SIMILARWEB_URL']
 end
 
 post '/salve_info' do
@@ -43,7 +44,10 @@ post '/salve_info' do
                 'Bounce Rate' => nil,  
                 'Pages per Visit' => nil,  
                 'Last Month Change' => nil,  
-                'Avg Visit Duration' => nil,  
+                'Avg Visit Duration' => nil, 
+                'Global Rank' => nil,
+                'Country Rank' => nil,
+                'Category Rank' => nil 
             }
 
             close_popup_button = driver.find_element(class: 'app-banner__dismiss-button')
@@ -56,6 +60,7 @@ post '/salve_info' do
 
             info_boxes = driver.find_elements(class: 'engagement-list__item')
             extract_data(info_boxes, website_data)
+
             info_card_rows = driver.find_elements(class: 'app-company-info__row')
             extract_data(info_card_rows, website_data)
 
