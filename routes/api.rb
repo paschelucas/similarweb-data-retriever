@@ -1,9 +1,10 @@
 require 'selenium-webdriver'
 require 'securerandom'
-require 'dotenv/load'
+require 'dotenv'
 require_relative '../config/DriverManager'
 require_relative '../utils/extract_data'
 require_relative '../models/WebsiteData'
+Dotenv.load
 
 configure do
     set :driver_manager, DriverManager.new
@@ -45,9 +46,6 @@ post '/salve_info' do
                 'Pages per Visit' => nil,  
                 'Last Month Change' => nil,  
                 'Avg Visit Duration' => nil, 
-                'Global Rank' => nil,
-                'Country Rank' => nil,
-                'Category Rank' => nil 
             }
 
             close_popup_button = driver.find_element(class: 'app-banner__dismiss-button')
@@ -63,7 +61,6 @@ post '/salve_info' do
 
             info_card_rows = driver.find_elements(class: 'app-company-info__row')
             extract_data(info_card_rows, website_data)
-
 
             website_object = WebsiteData.new(
                 operation_id: operation_id,
@@ -83,7 +80,7 @@ post '/salve_info' do
 
             begin
                 website_object.save!
-            rescue StandardError => e
+            rescue Mongo::Error => e
                 status(500)
                 return { error: "Erro ao salvar os dados: #{e.message}" }
             end
