@@ -19,6 +19,7 @@ GEM
     concurrent-ruby (1.2.3)
     connection_pool (2.4.1)
     date (3.3.4)
+    dotenv (2.8.1)
     drb (2.2.1)
     ffi (1.16.3)
     ffi (1.16.3-x64-mingw-ucrt)
@@ -96,6 +97,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  dotenv (~> 2.7, >= 2.7.6)
   mongo (~> 2.19)
   mongoid
   open-uri (~> 0.4.1)
